@@ -1,12 +1,12 @@
+# IntelliJ IDEA 工程文件
+.idea/
+*.iml
+modules.xml
+workspace.xml
+
 # 编译输出
 /bin/
 /eino-mcp
-
-# IDE配置
-.idea/
-.vscode/
-*.swp
-*.swo
 
 # 依赖管理
 /go.sum
@@ -16,7 +16,8 @@
 .env.local
 
 # 配置文件
-config.yaml  # 当前工程中有config.yaml文件，通常不应提交包含敏感信息的配置文件
+/config.yaml
+!config.example.yaml
 
 # 测试输出
 *.test

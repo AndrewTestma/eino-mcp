@@ -10,6 +10,7 @@ type OpenAIConfig struct {
 	APIKey  string `mapstructure:"api_key"`
 	BaseURL string `mapstructure:"base_url"`
 	Model   string `mapstructure:"model"`
+	Proxy   string `mapstructure:"proxy"` // 新增代理配置
 }
 
 type AppConfig struct {

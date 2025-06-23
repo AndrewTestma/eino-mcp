@@ -2,12 +2,15 @@ package agent
 
 import (
 	"context"
+	"eino-mcp/thoughtchain"
 	"eino-mcp/tool"
+	"fmt"
 	"github.com/cloudwego/eino/components/model"
 	tools "github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/flow/agent/react"
 	"github.com/cloudwego/eino/schema"
+	"strings"
 )
 
 // ConversationAgent 对话代理
@@ -16,6 +19,7 @@ type ConversationAgent struct {
 	tools    []tool.Tool
 	messages []*schema.Message
 	ctx      context.Context
+	flow     compose.Runnable[map[string]any, *thoughtchain.ThoughtChain] // 新增：思考链流程
 }
 
 // NewConversationAgent 创建对话代理
@@ -23,6 +27,7 @@ func NewConversationAgent(
 	ctx context.Context,
 	model model.ChatModel,
 	toolManager tool.MCPToolManager, // 依赖工具接口
+	flow compose.Runnable[map[string]any, *thoughtchain.ThoughtChain], // 思考链流程
 ) (*ConversationAgent, error) {
 	tools, err := toolManager.GetTools(ctx)
 	if err != nil {
@@ -48,6 +53,7 @@ func NewConversationAgent(
 		tools:    tools,
 		messages: []*schema.Message{},
 		ctx:      ctx,
+		flow:     flow, // 保存思考链流程
 	}, nil
 }
 
@@ -70,9 +76,18 @@ func (a *ConversationAgent) SendMessage(input string) (string, error) {
 		},
 		MaxStep: 20,
 		MessageModifier: func(ctx context.Context, input []*schema.Message) []*schema.Message {
-			return append([]*schema.Message{
-				schema.SystemMessage("你是一个能调用工具的智能助手，请根据用户需求选择合适的工具并展示思考过程"),
-			}, input...)
+			// 调用思考链流程
+			thoughtChain, err := a.flow.Invoke(ctx, map[string]any{"query": input[len(input)-1].Content})
+			if err != nil {
+				return append([]*schema.Message{
+					schema.SystemMessage("你是一个能调用工具的智能助手，请根据用户需求选择合适的工具并展示思考过程"),
+				}, input...)
+			}
+			stepsPrompt := fmt.Sprintf("任务步骤：\n%s", strings.Join(thoughtChain.Steps, "\n"))
+			systemMsg := schema.SystemMessage(fmt.Sprintf(`你是一个能调用工具的智能助手。请根据以下要求处理用户问题：
+%s
+请按步骤选择工具并展示思考过程`, stepsPrompt))
+			return append([]*schema.Message{systemMsg}, input...)
 		},
 	})
 	if err != nil {

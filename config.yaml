@@ -1,6 +1,0 @@
-mcp:
-  server_url: "http://localhost:12345/sse"
-openai:
-  api_key: "sk-14d8e0db18214302a2ae13e493094d98"
-  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-  model: "qwen-plus"

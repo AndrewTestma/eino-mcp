@@ -37,16 +37,16 @@ func main() {
 	}
 	defer toolManager.Close()
 
-	// 初始化对话代理
-	convAgent, err := agent.NewConversationAgent(ctx, openaiModel, *toolManager)
-	if err != nil {
-		panic(fmt.Sprintf("初始化对话代理失败: %v", err))
-	}
-
 	// 初始化思考链流程
 	flow, err := thoughtchain.BuildThoughtChainFlow(ctx, openaiModel)
 	if err != nil {
 		panic(fmt.Sprintf("构建思考链流程失败: %v", err))
+	}
+
+	// 初始化对话代理
+	convAgent, err := agent.NewConversationAgent(ctx, openaiModel, *toolManager, flow)
+	if err != nil {
+		panic(fmt.Sprintf("初始化对话代理失败: %v", err))
 	}
 
 	// 示例：使用对话代理

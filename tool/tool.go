@@ -8,6 +8,7 @@ import (
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"log"
+	"net/http"
 )
 
 type Tool interface {
@@ -20,7 +21,11 @@ type MCPToolManager struct {
 }
 
 func NewMCPToolManager(ctx context.Context, serverURL string) (*MCPToolManager, error) {
-	cli, err := client.NewSSEMCPClient(serverURL)
+	cli, err := client.NewSSEMCPClient(serverURL, client.WithHTTPClient(&http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}))
 	if err != nil {
 		return nil, err
 	}

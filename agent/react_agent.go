@@ -80,7 +80,7 @@ func (a *ConversationAgent) SendMessage(input string) (string, error) {
 			thoughtChain, err := a.flow.Invoke(ctx, map[string]any{"query": input[len(input)-1].Content})
 			if err != nil {
 				return append([]*schema.Message{
-					schema.SystemMessage("你是一个能调用工具的智能助手，请根据用户需求选择合适的工具并展示思考过程"),
+					schema.SystemMessage("你是一个能调用工具的智能助手。用户询问具体功能（如门票、酒店）时，必须使用\"vector_search\"工具搜索功能入口URL，并直接返回链接"),
 				}, input...)
 			}
 			stepsPrompt := fmt.Sprintf("任务步骤：\n%s", strings.Join(thoughtChain.Steps, "\n"))
